@@ -1,3 +1,7 @@
+# Second Individual Assessment
+1. Part 1B -> Branch p1b
+2. Part 2B -> Branch p2b
+
 # FlightMan
 
 This is an air travel management server. In this, we want to build an API (no GUI)
