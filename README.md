@@ -1,3 +1,18 @@
+# Refactoring steps:
+1. I determined that the initial if statements inside the function
+"createBooking()" were essentially determining whether or not the booking is
+valid. Only if it is valid does it attempt to create the booking. Thus, going by
+the function name, the validation of the booking should be done separately. Thus,
+I created a private helper function "validateBooking()" that will be called by
+the "createBooking()" function instead of having those inital if statements.
+Those if statements were pushed to this new function instead.
+
+2. Repeated the same step for the "luggageCheckIn()" function to create another
+private helper function, "validateLuggageCheckIn()".
+
+3. Ran all the tests to ensure that the functinality of the service was not
+unintentionally modified.
+
 # FlightMan
 
 This is an air travel management server. In this, we want to build an API (no GUI)

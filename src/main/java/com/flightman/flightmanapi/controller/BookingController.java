@@ -52,17 +52,11 @@ public class BookingController {
         }
 
         /*
-         * Method that creates a new record in the Booking table by associating the
-         * supplied userId and flightId.
-         * If failure occurs during booking, returns HTTP NO_CONTENT
+         * Helper function to validate a requested booking. If validation fails, returns
+         * appropriate response, else, returns null to allow the booking to happen.
          */
-        @ApiOperation(value = "Create Bookings", notes = "Takes in the user ID, flight ID, seat number, and the date of the flight. It books the flight if seats are available and returns the booking details.")
-        @ApiResponses({ @ApiResponse(code = 201, message = "The created booking is successfully returned. If there are no bookings, an empty list is returned."),
-                        @ApiResponse(code = 500, message = "There was an unexpected problem while creating bookings") })
-        @PostMapping("/bookings")
-        public ResponseEntity<String> createBooking(final String userId, final String flightId,
-                        @RequestParam(required = false) final String seatNumber, final String date,
-                        final Boolean useRewardPoints)
+        private ResponseEntity<String> validateBooking(final String userId, final String flightId,
+                        final String seatNumber, final String date, final Boolean useRewardPoints)
                         throws JsonProcessingException {
                 Date d;
                 if (Boolean.FALSE.equals(this.bookingService.validateUser(userId))) {
@@ -85,6 +79,27 @@ public class BookingController {
                 } catch (Exception e) {
                         return new ResponseEntity<>("Invalid date supplied", HttpStatus.BAD_REQUEST);
                 }
+                return null;
+        }
+
+        /*
+         * Method that creates a new record in the Booking table by associating the
+         * supplied userId and flightId.
+         * If failure occurs during booking, returns HTTP NO_CONTENT
+         */
+        @ApiOperation(value = "Create Bookings", notes = "Takes in the user ID, flight ID, seat number, and the date of the flight. It books the flight if seats are available and returns the booking details.")
+        @ApiResponses({ @ApiResponse(code = 201, message = "The created booking is successfully returned. If there are no bookings, an empty list is returned."),
+                        @ApiResponse(code = 500, message = "There was an unexpected problem while creating bookings") })
+        @PostMapping("/bookings")
+        public ResponseEntity<String> createBooking(final String userId, final String flightId,
+                        @RequestParam(required = false) final String seatNumber, final String date,
+                        final Boolean useRewardPoints)
+                        throws JsonProcessingException {
+                ResponseEntity<String> validatedBookingResponse = validateBooking(userId, flightId, seatNumber, date,
+                                useRewardPoints);
+                if (validatedBookingResponse != null)
+                        return validatedBookingResponse;
+
                 Booking booking = this.bookingService.book(userId, flightId, seatNumber, date, useRewardPoints);
                 final HttpHeaders httpHeaders = new HttpHeaders();
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -101,19 +116,12 @@ public class BookingController {
         }
 
         /*
-         * Method that checks-in a user's luggage for a specific flight booking.
-         * Returns 400 if input params are invalid.
-         * If failure occurs during check-in despite input fields being valid, returns
-         * HTTP 503
+         * Helper function to validate a requested luggage check in. If validation
+         * fails, returns appropriate response, else, returns null to allow the luggage
+         * check in to happen.
          */
-        @ApiOperation(value = "Luggage Check-In", notes = "Takes in the booking ID, luggage count, and total weight of the luggage and checks-in the same.")
-        @ApiResponses({ @ApiResponse(code = 200, message = "Luggage check-in was successful."),
-                        @ApiResponse(code = 400, message = "The supplied paramters were invalid"),
-                        @ApiResponse(code = 503, message = "The check-in service is temporarily unavailable") })
-        @PostMapping("/bookings/id/{id}/luggagecheckin")
-        public ResponseEntity<String> luggageCheckIn(@PathVariable("id") final String bookingId,
-                        @RequestParam(required = true) final Integer count,
-                        @RequestParam(required = true) final float totalWeight) {
+        private ResponseEntity<String> validateLuggageCheckIn(final String bookingId, final Integer count,
+                        final float totalWeight) {
                 if (bookingId == null || bookingId.equals("")
                                 || Boolean.TRUE.equals(!this.bookingService.validateBooking(bookingId))) {
                         return new ResponseEntity<>("Invalid Booking ID", HttpStatus.BAD_REQUEST);
@@ -134,6 +142,27 @@ public class BookingController {
                         return new ResponseEntity<>("Both luggages can weigh only upto 46 kgs",
                                         HttpStatus.BAD_REQUEST);
                 }
+                return null;
+        }
+
+        /*
+         * Method that checks-in a user's luggage for a specific flight booking.
+         * Returns 400 if input params are invalid.
+         * If failure occurs during check-in despite input fields being valid, returns
+         * HTTP 503
+         */
+        @ApiOperation(value = "Luggage Check-In", notes = "Takes in the booking ID, luggage count, and total weight of the luggage and checks-in the same.")
+        @ApiResponses({ @ApiResponse(code = 200, message = "Luggage check-in was successful."),
+                        @ApiResponse(code = 400, message = "The supplied paramters were invalid"),
+                        @ApiResponse(code = 503, message = "The check-in service is temporarily unavailable") })
+        @PostMapping("/bookings/id/{id}/luggagecheckin")
+        public ResponseEntity<String> luggageCheckIn(@PathVariable("id") final String bookingId,
+                        @RequestParam(required = true) final Integer count,
+                        @RequestParam(required = true) final float totalWeight) {
+                ResponseEntity<String> validatedLuggageCheckInResponse = validateLuggageCheckIn(bookingId, count,
+                                totalWeight);
+                if (validatedLuggageCheckInResponse != null)
+                        return validatedLuggageCheckInResponse;
                 if (Boolean.TRUE.equals(this.bookingService.checkInLuggage(bookingId, count, totalWeight))) {
                         return new ResponseEntity<>("Luggage checked In Successfully!", HttpStatus.OK);
                 }
