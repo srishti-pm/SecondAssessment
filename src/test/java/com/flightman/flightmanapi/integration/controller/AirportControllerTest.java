@@ -129,7 +129,8 @@ public class AirportControllerTest {
                                                                                 (this.user + ":" + this.password)
                                                                                                 .getBytes()))
                                                 .accept(MediaType.ALL))
-                                .andExpect(status().isOk());
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$").value("Airport does not exist."));
         }
 }
 

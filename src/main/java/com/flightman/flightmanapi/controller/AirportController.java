@@ -47,6 +47,13 @@ public class AirportController {
                         throws JsonProcessingException {
                 List<Airport> airportsList;
                 airportsList = airportService.find(airportName);
+                // The mutant that our code initially failed to kill was reversing the boolean
+                // value in the below if expression. This is because the test suite only checks
+                // if the returned status is OK, and doesn't check the content body of the
+                // result. So, since OK is returned irrespective of whether the airportsList is
+                // empty or not, the mutant survived.
+                // Now, I have killed this mutant by adding an additional check for the body of
+                // the result in the case of an empty airportsList.
                 if (!airportsList.isEmpty()) {
                         final HttpHeaders httpHeaders = new HttpHeaders();
                         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
